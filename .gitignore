@@ -32,3 +32,6 @@ build/
 
 # Logs
 *.log
+# Trained ML models
+*.pkl
+*.joblib
