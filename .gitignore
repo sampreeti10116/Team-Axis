@@ -1,0 +1,34 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# Environment variables
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Python distribution files
+*.egg-info/
+dist/
+build/
+
+# Model files (uncomment if models are large or generated)
+# *.pkl
+# *.joblib
+
+# Logs
+*.log
