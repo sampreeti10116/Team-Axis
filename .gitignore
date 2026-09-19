@@ -35,3 +35,4 @@ build/
 # Trained ML models
 *.pkl
 *.joblib
+*.db
