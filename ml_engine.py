@@ -109,11 +109,49 @@ class AgriMLEngine:
         }
         self.is_trained = True
 
+    def classify_crop_season(self, crop: str) -> str:
+        c = crop.lower().strip()
+        rabi_list = ['wheat', 'barley', 'mustard', 'gram', 'chickpea', 'oats', 'pea', 'potato', 'linseed']
+        zaid_list = ['watermelon', 'muskmelon', 'cucumber', 'vegetable', 'fodder', 'sunflower', 'gourd']
+        
+        if any(r in c for r in rabi_list):
+            return "Rabi"
+        elif any(z in c for z in zaid_list):
+            return "Zaid"
+        else:
+            return "Kharif"
+
+    def get_regional_profile(self, location: str) -> dict:
+        loc_lower = location.lower()
+        profiles = {
+            'punjab': {'rainfall': 580.0, 'temp': 23.5, 'humidity': 55.0, 'soil': 'Alluvial', 'multiplier': 1.15, 'region_name': 'Punjab (High Irrigation Plain)'},
+            'haryana': {'rainfall': 540.0, 'temp': 24.0, 'humidity': 54.0, 'soil': 'Alluvial', 'multiplier': 1.12, 'region_name': 'Haryana (Indo-Gangetic Plain)'},
+            'uttar pradesh': {'rainfall': 950.0, 'temp': 25.5, 'humidity': 65.0, 'soil': 'Alluvial Silt', 'multiplier': 1.06, 'region_name': 'Uttar Pradesh (Central Alluvial)'},
+            'maharashtra': {'rainfall': 880.0, 'temp': 27.8, 'humidity': 62.0, 'soil': 'Black Cotton Clay', 'multiplier': 1.02, 'region_name': 'Maharashtra (Deccan Plateau)'},
+            'gujarat': {'rainfall': 760.0, 'temp': 29.2, 'humidity': 60.0, 'soil': 'Black Sandy', 'multiplier': 1.04, 'region_name': 'Gujarat (Saurashtra Plain)'},
+            'karnataka': {'rainfall': 920.0, 'temp': 26.5, 'humidity': 68.0, 'soil': 'Red Loam', 'multiplier': 1.01, 'region_name': 'Karnataka (Southern Plateau)'},
+            'tamil nadu': {'rainfall': 990.0, 'temp': 29.5, 'humidity': 72.0, 'soil': 'Red Clay', 'multiplier': 1.03, 'region_name': 'Tamil Nadu (Coromandel Coast)'},
+            'west bengal': {'rainfall': 1680.0, 'temp': 28.5, 'humidity': 82.0, 'soil': 'Alluvial Delta', 'multiplier': 1.08, 'region_name': 'West Bengal (Gangetic Delta)'},
+            'kerala': {'rainfall': 2450.0, 'temp': 28.0, 'humidity': 85.0, 'soil': 'Laterite', 'multiplier': 0.98, 'region_name': 'Kerala (Malabar High Rainfall Zone)'},
+            'rajasthan': {'rainfall': 390.0, 'temp': 33.8, 'humidity': 36.0, 'soil': 'Desert Sandy', 'multiplier': 0.88, 'region_name': 'Rajasthan (Arid Zone)'},
+            'bihar': {'rainfall': 1120.0, 'temp': 26.2, 'humidity': 71.0, 'soil': 'Alluvial', 'multiplier': 0.97, 'region_name': 'Bihar (Middle Gangetic Plain)'},
+            'madhya pradesh': {'rainfall': 1050.0, 'temp': 26.8, 'humidity': 58.0, 'soil': 'Black Soil', 'multiplier': 1.00, 'region_name': 'Madhya Pradesh (Central High Plain)'},
+            'andhra pradesh': {'rainfall': 940.0, 'temp': 29.0, 'humidity': 70.0, 'soil': 'Coastal Alluvial', 'multiplier': 1.03, 'region_name': 'Andhra Pradesh (Coastal Zone)'}
+        }
+        for k, p in profiles.items():
+            if k in loc_lower:
+                return p
+        return {'rainfall': 750.0, 'temp': 26.5, 'humidity': 62.0, 'soil': 'Loamy', 'multiplier': 1.00, 'region_name': location}
+
     def predict_yield(self, crop, location, season, irrigation, field_area, soil_ph, moisture, n, p, k, organic_matter, algo_name="Random Forest"):
         crop = crop.strip().title() if crop else "Wheat"
         location = location.strip() if location else "Punjab, India"
         state = location.split(',')[0].strip() if ',' in location else location
         
+        # Automatically classify season based on crop
+        auto_season = self.classify_crop_season(crop)
+        reg_prof = self.get_regional_profile(location)
+
         area_acres = float(field_area)
         area_ha = area_acres * 0.404686
         ph = float(soil_ph)
@@ -127,19 +165,21 @@ class AgriMLEngine:
         np_ratio = val_n / max(1.0, val_p)
         kn_ratio = val_k / max(1.0, val_n)
 
-        rainfall_mm = 650.0 if crop in ['Rice', 'Sugarcane'] else 450.0
-        temp_avg = 24.5
-        humidity = 60.0
+        # Dynamic climate and soil baseline depending upon location
+        rainfall_mm = reg_prof['rainfall']
+        temp_avg = reg_prof['temp']
+        humidity = reg_prof['humidity']
+        soil_type = reg_prof['soil']
         prev_yield = 4.0 if crop == 'Wheat' else (4.5 if crop == 'Rice' else 2.5)
         yield_trend = 2.5
         ndvi = 0.68
 
         input_df = pd.DataFrame([{
             'state': state,
-            'season': season,
+            'season': auto_season,
             'crop_type': crop,
             'irrigation_type': irrigation,
-            'soil_type': 'Loamy',
+            'soil_type': soil_type,
             'area_sown_hectares': area_ha,
             'rainfall_mm': rainfall_mm,
             'temperature_avg_c': temp_avg,
@@ -161,11 +201,12 @@ class AgriMLEngine:
         
         if self.preprocessor and selected_model:
             X_trans = self.preprocessor.transform(input_df)
-            pred_per_ha = float(selected_model.predict(X_trans)[0])
+            base_pred = float(selected_model.predict(X_trans)[0])
         else:
-            pred_per_ha = 4.25
+            base_pred = 4.25
 
-        pred_per_ha = round(max(0.5, pred_per_ha), 2)
+        # Prediction depends dynamically upon regional soil/climate multiplier
+        pred_per_ha = round(max(0.5, base_pred * reg_prof['multiplier']), 2)
         total_yield = round(pred_per_ha * area_ha, 2)
 
         model_metric = self.metrics.get(algo_name, {'r2': 0.9011, 'mae': 0.189, 'accuracy_pct': 90.1})
@@ -173,10 +214,13 @@ class AgriMLEngine:
         ph_status = "Optimal" if 6.0 <= ph <= 7.5 else ("Sub-optimal Acidic" if ph < 6.0 else "Sub-optimal Alkaline")
         npk_status = "Balanced High NPK" if total_npk >= 200 else "Moderate NPK"
         irrig_status = f"High Efficiency ({irrigation})"
+        loc_impact_pct = round((reg_prof['multiplier'] - 1.0) * 100, 1)
+        loc_status = f"{reg_prof['region_name']} ({'High Productivity Zone' if loc_impact_pct >= 5 else ('Arid/Stressed' if loc_impact_pct < 0 else 'Balanced Regional Baseline')})"
 
         return {
             'crop': crop,
             'location': location,
+            'season': auto_season,
             'predicted_per_ha': pred_per_ha,
             'total_yield_tonnes': total_yield,
             'field_area_acres': area_acres,
@@ -189,13 +233,13 @@ class AgriMLEngine:
             'impact_factors': [
                 {'factor': 'Soil Health & pH', 'pct': 32.5, 'status': ph_status},
                 {'factor': 'NPK Nutrients', 'pct': 30.0, 'status': npk_status},
-                {'factor': 'Irrigation System', 'pct': 22.5, 'status': irrig_status},
-                {'factor': 'Moisture & Organic Matter', 'pct': 15.0, 'status': f'{moist}% moisture, {om}% OM'}
+                {'factor': f"Regional Climate ({reg_prof['soil']})", 'pct': 22.5, 'status': loc_status},
+                {'factor': f'Auto Crop Season ({auto_season})', 'pct': 15.0, 'status': f'{auto_season} Sowing Cycle'}
             ],
             'agronomic_insights': [
-                f"Trained backend {algo_name} model predicts a yield of {pred_per_ha} tonnes/ha for {crop} in {location}.",
-                f"Field area of {area_acres} acres ({round(area_ha, 2)} hectares) yields an estimated total harvest of {total_yield} tonnes.",
-                f"Model evaluation on test set shows accuracy of {model_metric['accuracy_pct']}% with R² score of {model_metric['r2']}."
+                f"Crop '{crop}' is automatically classified as a **{auto_season}** crop.",
+                f"Location factor for **{location}** ({reg_prof['region_name']}) adjusts yield baseline with regional rainfall of {rainfall_mm}mm and avg temp of {temp_avg}°C.",
+                f"Trained {algo_name} model predicts a yield of {pred_per_ha} tonnes/ha (total {total_yield} tonnes across {area_acres} acres)."
             ]
         }
 
@@ -244,25 +288,46 @@ class AgriMLEngine:
         }
 
     def get_weather_forecast(self, location="Punjab, India"):
+        prof = self.get_regional_profile(location)
+        temp = prof['temp']
+        hum = prof['humidity']
+        rain = prof['rainfall']
+        
+        if hum > 75 or rain > 1400:
+            condition = "Humid / Tropical Rain"
+            advisory = f"High atmospheric humidity ({hum}%) & regional rainfall ({rain}mm) in {location}. Ensure field drainage to prevent waterlogging and fungal infection."
+            day3_cond = "Heavy Rain"
+            day3_prob = 85
+        elif hum < 45 or rain < 500:
+            condition = "Arid / Dry Sunny"
+            advisory = f"Arid condition ({hum}% humidity) in {location}. Micro-drip irrigation and mulch layering recommended to conserve soil moisture."
+            day3_cond = "Clear & Hot"
+            day3_prob = 10
+        else:
+            condition = "Partly Cloudy"
+            advisory = f"Favorable weather in {location} ({temp}°C, {hum}% humidity). Ideal window for field top-dressing and nutrient spraying."
+            day3_cond = "Light Rain"
+            day3_prob = 40
+
         return {
             'location': location,
             'current': {
-                'temp_c': 28.5,
-                'condition': 'Partly Cloudy',
-                'humidity_pct': 58,
-                'rainfall_mm': 2.4,
-                'wind_kmh': 12.0,
-                'evapotranspiration_mm': 4.2
+                'temp_c': round(temp + 1.8, 1),
+                'condition': condition,
+                'humidity_pct': int(hum),
+                'rainfall_mm': round(rain / 120.0, 1),
+                'wind_kmh': round(10.0 + (hum / 10.0), 1),
+                'evapotranspiration_mm': round(max(2.0, 7.5 - (hum / 20.0)), 1)
             },
-            'agri_advisory': "Mild humidity with moderate temperature. Ideal window for field spraying and top-dressing fertilizer. Rain expected in 3 days.",
+            'agri_advisory': advisory,
             'forecast': [
-                {'day': 'Today', 'high': 30, 'low': 21, 'condition': 'Sunny', 'rain_prob': 10},
-                {'day': 'Tomorrow', 'high': 31, 'low': 22, 'condition': 'Partly Cloudy', 'rain_prob': 20},
-                {'day': 'Day 3', 'high': 27, 'low': 20, 'condition': 'Light Rain', 'rain_prob': 75},
-                {'day': 'Day 4', 'high': 26, 'low': 19, 'condition': 'Moderate Rain', 'rain_prob': 85},
-                {'day': 'Day 5', 'high': 29, 'low': 20, 'condition': 'Clear', 'rain_prob': 15},
-                {'day': 'Day 6', 'high': 32, 'low': 22, 'condition': 'Sunny', 'rain_prob': 5},
-                {'day': 'Day 7', 'high': 33, 'low': 23, 'condition': 'Sunny', 'rain_prob': 5}
+                {'day': 'Today', 'high': int(temp + 3), 'low': int(temp - 4), 'condition': condition, 'rain_prob': min(90, int(rain / 25))},
+                {'day': 'Tomorrow', 'high': int(temp + 4), 'low': int(temp - 3), 'condition': 'Partly Cloudy', 'rain_prob': 20},
+                {'day': 'Day 3', 'high': int(temp + 2), 'low': int(temp - 4), 'condition': day3_cond, 'rain_prob': day3_prob},
+                {'day': 'Day 4', 'high': int(temp + 1), 'low': int(temp - 5), 'condition': 'Clear', 'rain_prob': 15},
+                {'day': 'Day 5', 'high': int(temp + 3), 'low': int(temp - 3), 'condition': 'Sunny', 'rain_prob': 5},
+                {'day': 'Day 6', 'high': int(temp + 4), 'low': int(temp - 2), 'condition': 'Sunny', 'rain_prob': 5},
+                {'day': 'Day 7', 'high': int(temp + 5), 'low': int(temp - 1), 'condition': 'Sunny', 'rain_prob': 5}
             ]
         }
 

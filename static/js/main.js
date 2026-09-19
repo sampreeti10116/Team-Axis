@@ -6,10 +6,49 @@ let currentUserRole = "farmer";
 
 document.addEventListener("DOMContentLoaded", () => {
   loadInitialData();
+  const cropSelect = document.getElementById("p-crop");
+  if (cropSelect) {
+    cropSelect.addEventListener("change", updateAutoSeason);
+  }
+  updateAutoSeason();
 });
 
+function classifyCropSeason(crop) {
+  const c = (crop || "").toLowerCase().trim();
+  const rabiCrops = ['wheat', 'barley', 'mustard', 'gram', 'chickpea', 'oats', 'pea', 'potato', 'linseed'];
+  const zaidCrops = ['watermelon', 'muskmelon', 'cucumber', 'vegetable', 'fodder', 'sunflower', 'gourd'];
+  
+  if (rabiCrops.some(r => c.includes(r))) {
+    return "Rabi";
+  } else if (zaidCrops.some(z => c.includes(z))) {
+    return "Zaid";
+  } else {
+    return "Kharif";
+  }
+}
+
+function updateAutoSeason() {
+  const cropEl = document.getElementById("p-crop");
+  const seasonEl = document.getElementById("p-season");
+  if (cropEl && seasonEl) {
+    const crop = cropEl.value;
+    const season = classifyCropSeason(crop);
+    seasonEl.value = season;
+  }
+}
+
+function handleLocationChange(loc) {
+  if (!loc) return;
+  const weatherInput = document.getElementById("weather-search-input");
+  if (weatherInput) {
+    weatherInput.value = loc;
+  }
+  loadWeather(loc);
+}
+
 function loadInitialData() {
-  loadWeather("Punjab, India");
+  const loc = document.getElementById("p-location") ? document.getElementById("p-location").value : "Punjab, India";
+  loadWeather(loc);
   loadSoilAnalysis();
   loadMarketData();
   loadSchemes();

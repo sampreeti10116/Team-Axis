@@ -394,8 +394,23 @@
             </div>
 
             <div class="form-group full-width" style="margin-bottom: 14px;">
-              <label class="form-label">Location</label>
-              <input type="text" id="p-location" class="form-control" value="Punjab, India" data-testid="input-location-select">
+              <label class="form-label">Location (State / Region)</label>
+              <input type="text" id="p-location" class="form-control" value="Punjab, India" list="location-options" data-testid="input-location-select" onchange="handleLocationChange(this.value)" oninput="handleLocationChange(this.value)">
+              <datalist id="location-options">
+                <option value="Punjab, India"></option>
+                <option value="Haryana, India"></option>
+                <option value="Uttar Pradesh, India"></option>
+                <option value="Maharashtra, India"></option>
+                <option value="Gujarat, India"></option>
+                <option value="Karnataka, India"></option>
+                <option value="Tamil Nadu, India"></option>
+                <option value="West Bengal, India"></option>
+                <option value="Kerala, India"></option>
+                <option value="Rajasthan, India"></option>
+                <option value="Bihar, India"></option>
+                <option value="Madhya Pradesh, India"></option>
+                <option value="Andhra Pradesh, India"></option>
+              </datalist>
             </div>
 
             <div class="form-grid" style="margin-bottom: 14px;">
@@ -404,12 +419,8 @@
                 <input type="number" step="0.1" id="p-area" class="form-control" value="5" data-testid="input-field-area">
               </div>
               <div class="form-group">
-                <label class="form-label">Season</label>
-                <select id="p-season" class="form-control" data-testid="input-season">
-                  <option value="Kharif" selected>Kharif</option>
-                  <option value="Rabi">Rabi</option>
-                  <option value="Zaid">Zaid</option>
-                </select>
+                <label class="form-label">Season (Auto-Classified)</label>
+                <input type="text" id="p-season" class="form-control" value="Rabi" readonly style="background: var(--sage-light); font-weight: 700; color: var(--primary-green);" data-testid="input-season">
               </div>
             </div>
 
