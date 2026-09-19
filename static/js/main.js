@@ -286,21 +286,21 @@ async function handleHistorySearch(event) {
 }
 
 async function loadHistoricalTrends() {
-  const crop = document.getElementById("h-crop").value;
-  const loc = document.getElementById("h-location").value;
+  const crop = document.getElementById("h-crop") ? document.getElementById("h-crop").value : "Wheat";
+  const loc = document.getElementById("h-location") ? document.getElementById("h-location").value : "Punjab, India";
 
   try {
     const res = await fetch(`/api/historical-trends?crop=${encodeURIComponent(crop)}&location=${encodeURIComponent(loc)}`);
     const json = await res.json();
     if (json.success) {
-      renderHistoryChart(json.data.history);
+      renderHistoryChart(json.data.history, json.data.crop, json.data.location);
     }
   } catch (err) {
     console.error("History error:", err);
   }
 }
 
-function renderHistoryChart(data) {
+function renderHistoryChart(data, crop, location) {
   const ctx = document.getElementById("historyChart").getContext("2d");
   if (historyChartInstance) historyChartInstance.destroy();
 
@@ -308,13 +308,16 @@ function renderHistoryChart(data) {
   const yields = data.map(d => d.yield_tonnes_ha);
   const benchmarks = data.map(d => d.regional_benchmark);
 
+  const cropName = crop || (data.length ? data[0].crop : "Crop");
+  const locName = location || (data.length ? data[0].location : "Region");
+
   historyChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
       datasets: [
         {
-          label: 'Farm Yield (tonnes/ha)',
+          label: `${cropName} Harvest Yield (tonnes/ha)`,
           data: yields,
           borderColor: '#15803d',
           backgroundColor: 'rgba(21, 128, 61, 0.1)',
@@ -322,7 +325,7 @@ function renderHistoryChart(data) {
           tension: 0.3
         },
         {
-          label: 'Regional Benchmark',
+          label: `Regional Benchmark (${locName})`,
           data: benchmarks,
           borderColor: '#94a3b8',
           borderDash: [5, 5],
@@ -333,7 +336,16 @@ function renderHistoryChart(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom' } }
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return ` ${context.dataset.label}: ${context.raw} t/ha`;
+            }
+          }
+        }
+      }
     }
   });
 }

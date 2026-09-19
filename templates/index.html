@@ -657,18 +657,23 @@
       </div>
 
       <div class="card" style="margin-bottom: 24px;">
-        <form onsubmit="handleHistorySearch(event)" style="display: flex; gap: 16px; align-items: flex-end;">
-          <div class="form-group" style="width: 200px;">
+        <form onsubmit="handleHistorySearch(event)" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+          <div class="form-group" style="min-width: 180px; flex: 1;">
             <label class="form-label">Crop</label>
-            <select id="h-crop" class="form-control">
+            <select id="h-crop" class="form-control" onchange="loadHistoricalTrends()">
               <option value="Wheat" selected>Wheat</option>
               <option value="Rice">Rice</option>
               <option value="Maize">Maize</option>
+              <option value="Sugarcane">Sugarcane</option>
+              <option value="Cotton">Cotton</option>
+              <option value="Soybean">Soybean</option>
+              <option value="Mustard">Mustard</option>
+              <option value="Pulses">Pulses</option>
             </select>
           </div>
-          <div class="form-group" style="width: 240px;">
-            <label class="form-label">Location</label>
-            <input type="text" id="h-location" class="form-control" value="Punjab, India">
+          <div class="form-group" style="min-width: 220px; flex: 1.5;">
+            <label class="form-label">Location (State / Region)</label>
+            <input type="text" id="h-location" class="form-control" value="Punjab, India" list="location-options" onchange="loadHistoricalTrends()" oninput="loadHistoricalTrends()">
           </div>
           <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">Load trends</button>
         </form>

@@ -332,22 +332,43 @@ class AgriMLEngine:
         }
 
     def get_historical_trends(self, crop="Wheat", location="Punjab, India"):
+        crop_clean = crop.strip().title() if crop else "Wheat"
+        location_clean = location.strip() if location else "Punjab, India"
+        reg_prof = self.get_regional_profile(location_clean)
+
+        crop_bases = {
+            'Wheat': 3.8,
+            'Rice': 4.3,
+            'Sugarcane': 68.0,
+            'Cotton': 2.4,
+            'Maize': 3.4,
+            'Soybean': 2.1,
+            'Mustard': 1.8,
+            'Pulses': 1.2
+        }
+        base_y = crop_bases.get(crop_clean, 2.5)
+
         years = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025]
-        base_y = 3.6 if crop == "Wheat" else (4.2 if crop == "Rice" else 2.5)
-        
         data = []
         for i, y in enumerate(years):
-            val = round(base_y + (i * 0.12) + np.sin(i) * 0.25, 2)
-            rainfall = int(600 + np.cos(i) * 150)
+            raw_val = (base_y + (i * 0.14) + np.sin(i * 1.5) * 0.3) * reg_prof['multiplier']
+            val = round(max(0.2, raw_val), 2)
+            rainfall = int(reg_prof['rainfall'] + np.cos(i * 1.2) * (reg_prof['rainfall'] * 0.18))
+            benchmark = round(val * 0.90, 2)
             data.append({
                 'year': y,
-                'crop': crop,
-                'location': location,
+                'crop': crop_clean,
+                'location': location_clean,
                 'yield_tonnes_ha': val,
                 'rainfall_mm': rainfall,
-                'regional_benchmark': round(val * 0.92, 2)
+                'regional_benchmark': benchmark
             })
-        return {'crop': crop, 'location': location, 'history': data}
+        return {
+            'crop': crop_clean,
+            'location': location_clean,
+            'region_name': reg_prof['region_name'],
+            'history': data
+        }
 
     def get_market_intelligence(self, crop="Wheat"):
         prices = {
