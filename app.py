@@ -22,7 +22,7 @@ def api_predict():
         p = float(data.get("p", 60))
         k = float(data.get("k", 60))
         organic_matter = float(data.get("organic_matter", 2.5))
-        algo_name = data.get("algorithm", "Random Forest")
+        algo_name = data.get("algorithm") or "Gradient Boosting"
 
         res = engine.predict_yield(
             crop, location, season, irrigation, field_area,

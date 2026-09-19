@@ -439,20 +439,9 @@
               </div>
             </div>
 
-            <div class="form-grid" style="margin-bottom: 20px;">
-              <div class="form-group">
-                <label class="form-label">Organic matter (%)</label>
-                <input type="number" step="0.1" id="p-om" class="form-control" value="2.5" data-testid="input-organic-matter">
-              </div>
-              <div class="form-group">
-                <label class="form-label">ML Algorithm</label>
-                <select id="p-algo" class="form-control" style="font-weight: 600; color: var(--primary-green);" data-testid="input-algo-select">
-                  <option value="Random Forest" selected>Random Forest (Recommended)</option>
-                  <option value="Gradient Boosting">Gradient Boosting</option>
-                  <option value="Decision Tree">Decision Tree</option>
-                  <option value="Linear Regression">Linear Regression</option>
-                </select>
-              </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label class="form-label">Organic matter (%)</label>
+              <input type="number" step="0.1" id="p-om" class="form-control" value="2.5" data-testid="input-organic-matter">
             </div>
 
             <button type="submit" class="btn-primary" data-testid="submit-predict-btn">

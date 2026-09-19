@@ -125,7 +125,7 @@ async function handlePredictSubmit(event) {
     p: document.getElementById("p-p").value,
     k: document.getElementById("p-k").value,
     organic_matter: document.getElementById("p-om").value,
-    algorithm: document.getElementById("p-algo").value
+    algorithm: document.getElementById("p-algo") ? document.getElementById("p-algo").value : "Gradient Boosting"
   };
 
   try {
