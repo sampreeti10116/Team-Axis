@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriYield AI - Smart Crop Yield Prediction & Farm Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- AUTH SECTION: LOGIN -->
+  <div id="auth-login-view" class="auth-wrapper view-section active">
+    <div class="auth-hero auth-split-left" style="background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200&auto=format&fit=crop');">
+      <div class="auth-hero-overlay"></div>
+      <div class="auth-hero-content">
+        <h1 class="auth-hero-title">Smarter harvests start with data.</h1>
+        <p class="auth-hero-desc">Log in to predict yields, read your soil and plan every drop of water.</p>
+      </div>
+    </div>
+    <div class="auth-split-right">
+      <div class="auth-form-card">
+        <div class="brand" style="margin-bottom: 24px;" data-testid="nav-brand-logo">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4.1 5.5.8z"/><path d="M14.1 6a7 7 0 0 1 1.1 2.4c-1.4.3-2.5.3-3.4-.2-.9-.5-1.7-1.4-2.2-3.1 2-.4 3.2 0 4.5.9z"/></svg>
+          </div>
+          <div class="brand-text">AgriYield<span>AI</span></div>
+        </div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Welcome back</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Log in to your farm dashboard.</p>
+        
+        <form id="login-form" onsubmit="handleAuthSubmit(event, 'login')" data-testid="login-form">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label">Email</label>
+            <input type="email" id="login-email" class="form-control" value="farmer@agriyield.ai" required data-testid="login-email-input">
+          </div>
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label class="form-label">Password</label>
+            <input type="password" id="login-pass" class="form-control" value="farmer123" required data-testid="login-password-input">
+          </div>
+          <button type="submit" class="btn-primary" style="margin-bottom: 16px;" data-testid="auth-login-button">Log in</button>
+        </form>
+
+        <div class="demo-pills">
+          <button type="button" class="btn-outline" style="flex:1;" onclick="fillDemo('farmer')" data-testid="demo-farmer-btn">Try Farmer demo</button>
+          <button type="button" class="btn-outline" style="flex:1;" onclick="fillDemo('agronomist')" data-testid="demo-agronomist-btn">Try Agronomist demo</button>
+        </div>
+        
+        <p style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-muted);">
+          New here? <a href="#" onclick="switchAuthView('register')" style="color: var(--primary-green); font-weight: 600; text-decoration: none;" data-testid="go-register-link">Create an account</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH SECTION: REGISTER -->
+  <div id="auth-register-view" class="auth-wrapper view-section">
+    <div class="auth-split-left" style="background: white;">
+      <div class="auth-form-card">
+        <div class="brand" style="margin-bottom: 20px;">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4.1 5.5.8z"/><path d="M14.1 6a7 7 0 0 1 1.1 2.4c-1.4.3-2.5.3-3.4-.2-.9-.5-1.7-1.4-2.2-3.1 2-.4 3.2 0 4.5.9z"/></svg>
+          </div>
+          <div class="brand-text">AgriYield<span>AI</span></div>
+        </div>
+        <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Create account</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Start making data-driven farming decisions.</p>
+
+        <form id="register-form" onsubmit="handleAuthSubmit(event, 'register')" data-testid="register-form">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label">Full name</label>
+            <input type="text" id="reg-name" class="form-control" value="Ravi Kumar" required data-testid="register-name-input">
+          </div>
+          <div class="form-grid" style="margin-bottom: 12px;">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="reg-email" class="form-control" value="you@farm.com" required data-testid="register-email-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="reg-pass" class="form-control" placeholder="min 6 chars" value="123456" required data-testid="register-password-input">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label">I am a</label>
+            <select id="reg-role" class="form-control" data-testid="register-role-select">
+              <option value="farmer">Individual Farmer</option>
+              <option value="agronomist">Agronomist / Advisor</option>
+            </select>
+          </div>
+          <div class="form-grid" style="margin-bottom: 20px;">
+            <div class="form-group">
+              <label class="form-label">Farm / Org Name</label>
+              <input type="text" id="reg-farm" class="form-control" value="Green Acres" data-testid="register-farm-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Region</label>
+              <input type="text" id="reg-region" class="form-control" value="Punjab" data-testid="register-region-input">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-bottom: 16px;" data-testid="register-submit-button">Create account</button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+          Already have an account? <a href="#" onclick="switchAuthView('login')" style="color: var(--primary-green); font-weight: 600; text-decoration: none;" data-testid="go-login-link">Log in</a>
+        </p>
+      </div>
+    </div>
+    <div class="auth-hero auth-split-right" style="background-image: url('https://images.unsplash.com/photo-1586771107445-d3ca888129ff?q=80&w=1200&auto=format&fit=crop');">
+      <div class="auth-hero-overlay"></div>
+      <div class="auth-hero-content">
+        <h1 class="auth-hero-title">Join thousands of smart growers.</h1>
+        <p class="auth-hero-desc">AI insights, live weather and soil intelligence for every field.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP PLATFORM -->
+  <div id="main-app-wrapper" style="display: none; flex-direction: column; flex: 1;">
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="brand" onclick="switchNavTab('dashboard')" data-testid="nav-brand-logo">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4.1 5.5.8z"/><path d="M14.1 6a7 7 0 0 1 1.1 2.4c-1.4.3-2.5.3-3.4-.2-.9-.5-1.7-1.4-2.2-3.1 2-.4 3.2 0 4.5.9z"/></svg>
+        </div>
+        <div class="brand-text">AgriYield<span>AI</span></div>
+      </div>
+      <div class="nav-tabs">
+        <a class="nav-item active" data-tab="dashboard" data-testid="nav-link-dashboard" onclick="switchNavTab('dashboard')">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a class="nav-item" data-tab="predict" data-testid="nav-link-prediction" onclick="switchNavTab('predict')">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Predict
+        </a>
+        <a class="nav-item" data-tab="weather" data-testid="nav-link-weather" onclick="switchNavTab('weather')">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          Weather
+        </a>
+        <a class="nav-item" data-tab="soil" data-testid="nav-link-soil" onclick="switchNavTab('soil')">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+          Soil
+        </a>
+        <a class="nav-item" data-tab="history" data-testid="nav-link-historical" onclick="switchNavTab('history')">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          History
+        </a>
+        <a class="nav-item" data-tab="market" onclick="switchNavTab('market')">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Market
+        </a>
+        <a class="nav-item" data-tab="schemes" onclick="switchNavTab('schemes')">
+          <svg class="nav-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h8"/><path d="M8 10h8"/><path d="M8 14h4"/></svg>
+          Schemes
+        </a>
+      </div>
+      <div class="user-controls">
+        <button data-testid="persona-toggle-button" onclick="togglePersonaMode()" class="user-badge" style="cursor: pointer; border: 1px solid var(--mint-light);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="user-role-label">Farmer</span>
+        </button>
+        <span id="user-display-name" style="font-weight: 600; font-size: 0.9rem;">Ravi Kumar</span>
+        <button class="logout-btn" data-testid="logout-button" onclick="logout()" title="Logout">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- FARMER DASHBOARD VIEW -->
+    <div id="view-dashboard-farmer" class="container view-section active" data-testid="dashboard-page">
+      <div class="page-header">
+        <div>
+          <div class="badge-tag">FARMER VIEW</div>
+          <h1 class="page-title">Hi <span id="dash-farmer-name">Ravi Kumar</span></h1>
+          <p class="page-subtitle"><span id="dash-farm-name">Green Acres</span> · Here's your farm at a glance.</p>
+        </div>
+        <button class="btn-primary" style="width: auto; padding: 10px 20px;" data-testid="dashboard-new-prediction-btn" onclick="switchNavTab('predict')">
+          + New prediction
+        </button>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card" data-testid="stat-predictions">
+          <div class="metric-icon icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4.1 5.5.8z"/></svg>
+          </div>
+          <div class="metric-label">Predictions</div>
+          <div class="metric-value" id="dash-stat-pred">1</div>
+          <div class="metric-unit">run this session</div>
+        </div>
+        <div class="metric-card" data-testid="stat-avg-yield">
+          <div class="metric-icon icon-yellow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+          </div>
+          <div class="metric-label">Avg yield</div>
+          <div class="metric-value" id="dash-stat-yield">4.25 t</div>
+          <div class="metric-unit">per hectare</div>
+        </div>
+        <div class="metric-card" data-testid="stat-total-area">
+          <div class="metric-icon icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+          </div>
+          <div class="metric-label">Total area</div>
+          <div class="metric-value">5 ac</div>
+          <div class="metric-unit">registered field</div>
+        </div>
+        <div class="metric-card" data-testid="stat-soil-health">
+          <div class="metric-icon icon-orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/></svg>
+          </div>
+          <div class="metric-label">Avg soil health</div>
+          <div class="metric-value" id="dash-stat-soil">88</div>
+          <div class="metric-unit">out of 100</div>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Recent predictions</h3>
+          <div id="dash-recent-list">
+            <div data-testid="recent-prediction-row" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8faf7; border-radius: 8px; margin-bottom: 8px;">
+              <div>
+                <strong style="color: var(--primary-green);">Wheat</strong> · Punjab, India
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Model: Random Forest · Kharif</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-weight: 700;">4.25 t/ha</div>
+                <div style="font-size: 0.75rem; color: #16a34a;">90.1% accuracy</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Crop mix distribution</h3>
+          <div style="height: 220px; position: relative;">
+            <canvas id="cropMixChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGRONOMIST / ADVISOR DASHBOARD VIEW -->
+    <div id="view-dashboard-agronomist" class="container view-section">
+      <div class="page-header">
+        <div>
+          <div class="badge-tag" style="color: #7c3aed;">AGRONOMIST / ADVISOR COMMAND CENTER</div>
+          <h1 class="page-title">Hi <span id="dash-agro-name">Dr. Sharma</span></h1>
+          <p class="page-subtitle">Multi-farm regional portfolio, soil health monitoring & ML model performance.</p>
+        </div>
+        <button class="btn-primary" style="width: auto; padding: 10px 20px; background: #7c3aed;" onclick="switchNavTab('predict')">
+          + Run Batch Farm Models
+        </button>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card" style="border-top: 4px solid #7c3aed;">
+          <div class="metric-icon" style="background: #f3e8ff; color: #7c3aed;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="metric-label">Monitored Client Farms</div>
+          <div class="metric-value">14</div>
+          <div class="metric-unit">Active regional farms</div>
+        </div>
+        <div class="metric-card" style="border-top: 4px solid #007955;">
+          <div class="metric-icon icon-green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/></svg>
+          </div>
+          <div class="metric-label">Avg Portfolio Soil Index</div>
+          <div class="metric-value">76.4</div>
+          <div class="metric-unit">Good regional standing</div>
+        </div>
+        <div class="metric-card" style="border-top: 4px solid #ea580c;">
+          <div class="metric-icon icon-orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="metric-label">High-Risk Fields</div>
+          <div class="metric-value" style="color: #dc2626;">3</div>
+          <div class="metric-unit">Requires NPK amendment</div>
+        </div>
+        <div class="metric-card" style="border-top: 4px solid #0284c7;">
+          <div class="metric-icon icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <div class="metric-label">Top ML Model</div>
+          <div class="metric-value" style="font-size: 1.3rem; margin-top: 8px;">Gradient Boosting</div>
+          <div class="metric-unit">R² = 0.9467 · MAE 0.142</div>
+        </div>
+      </div>
+
+      <div class="split-layout" style="margin-bottom: 24px;">
+        <div class="card" style="grid-column: span 2;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 1.15rem;">Managed Client Farm Portfolio</h3>
+            <span class="user-badge" style="background: #f3e8ff; color: #7c3aed; border-color: #ddd6fe;">14 Farms Active</span>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+              <thead>
+                <tr style="background: var(--bg-sage); border-bottom: 1px solid var(--border-light);">
+                  <th style="padding: 10px 14px;">Farm Name</th>
+                  <th style="padding: 10px 14px;">Location</th>
+                  <th style="padding: 10px 14px;">Crop</th>
+                  <th style="padding: 10px 14px;">Soil pH</th>
+                  <th style="padding: 10px 14px;">Soil Health</th>
+                  <th style="padding: 10px 14px;">Status / Alert</th>
+                  <th style="padding: 10px 14px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 12px 14px; font-weight: 600;">Green Acres (Farmer Ravi)</td>
+                  <td style="padding: 12px 14px;">Punjab, India</td>
+                  <td style="padding: 12px 14px;">Wheat</td>
+                  <td style="padding: 12px 14px;">6.5</td>
+                  <td style="padding: 12px 14px;"><span class="btn-outline" style="padding: 2px 8px; font-size: 0.75rem;">88 / 100</span></td>
+                  <td style="padding: 12px 14px; color: #16a34a; font-weight: 600;">Optimal Growth</td>
+                  <td style="padding: 12px 14px;"><button class="btn-outline" onclick="switchNavTab('predict')">Run Model</button></td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 12px 14px; font-weight: 600;">SunValley Organics</td>
+                  <td style="padding: 12px 14px;">Karnataka, India</td>
+                  <td style="padding: 12px 14px;">Rice</td>
+                  <td style="padding: 12px 14px;">5.4</td>
+                  <td style="padding: 12px 14px;"><span class="btn-outline" style="padding: 2px 8px; font-size: 0.75rem; color: #dc2626; border-color: #fca5a5;">58 / 100</span></td>
+                  <td style="padding: 12px 14px; color: #dc2626; font-weight: 600;">Acidic Soil Alert</td>
+                  <td style="padding: 12px 14px;"><button class="btn-outline" onclick="switchNavTab('soil')">Send Advisory</button></td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 12px 14px; font-weight: 600;">Highland Harvest Ltd</td>
+                  <td style="padding: 12px 14px;">Maharashtra, India</td>
+                  <td style="padding: 12px 14px;">Cotton</td>
+                  <td style="padding: 12px 14px;">7.2</td>
+                  <td style="padding: 12px 14px;"><span class="btn-outline" style="padding: 2px 8px; font-size: 0.75rem;">82 / 100</span></td>
+                  <td style="padding: 12px 14px; color: #16a34a; font-weight: 600;">Healthy Harvest</td>
+                  <td style="padding: 12px 14px;"><button class="btn-outline" onclick="switchNavTab('predict')">Run Model</button>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 14px; font-weight: 600;">Punjab Agro Producers</td>
+                  <td style="padding: 12px 14px;">Ludhiana, India</td>
+                  <td style="padding: 12px 14px;">Maize</td>
+                  <td style="padding: 12px 14px;">6.8</td>
+                  <td style="padding: 12px 14px;"><span class="btn-outline" style="padding: 2px 8px; font-size: 0.75rem;">79 / 100</span></td>
+                  <td style="padding: 12px 14px; color: #d97706; font-weight: 600;">Irrigation Deficit</td>
+                  <td style="padding: 12px 14px;"><button class="btn-outline" onclick="switchNavTab('weather')">Check Rain</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREDICT CROP YIELD VIEW -->
+    <div id="view-predict" class="container view-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Crop Yield Predictor</h1>
+          <p class="page-subtitle">Enter your field details for ML-backed crop yield estimation and feature importance.</p>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <div class="card">
+          <form id="predict-form" onsubmit="handlePredictSubmit(event)" data-testid="yield-prediction-form">
+            <div class="form-grid" style="margin-bottom: 14px;">
+              <div class="form-group">
+                <label class="form-label">Crop</label>
+                <select id="p-crop" class="form-control" data-testid="input-crop-type">
+                  <option value="Wheat" selected>Wheat</option>
+                  <option value="Rice">Rice</option>
+                  <option value="Maize">Maize</option>
+                  <option value="Sugarcane">Sugarcane</option>
+                  <option value="Cotton">Cotton</option>
+                  <option value="Soybean">Soybean</option>
+                  <option value="Pulses">Pulses</option>
+                  <option value="Mustard">Mustard</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Irrigation</label>
+                <select id="p-irrigation" class="form-control" data-testid="input-irrigation-type">
+                  <option value="Drip" selected>Drip</option>
+                  <option value="Sprinkler">Sprinkler</option>
+                  <option value="Flood">Flood</option>
+                  <option value="Rainfed">Rainfed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group full-width" style="margin-bottom: 14px;">
+              <label class="form-label">Location</label>
+              <input type="text" id="p-location" class="form-control" value="Punjab, India" data-testid="input-location-select">
+            </div>
+
+            <div class="form-grid" style="margin-bottom: 14px;">
+              <div class="form-group">
+                <label class="form-label">Field area (acres)</label>
+                <input type="number" step="0.1" id="p-area" class="form-control" value="5" data-testid="input-field-area">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Season</label>
+                <select id="p-season" class="form-control" data-testid="input-season">
+                  <option value="Kharif" selected>Kharif</option>
+                  <option value="Rabi">Rabi</option>
+                  <option value="Zaid">Zaid</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid" style="margin-bottom: 14px;">
+              <div class="form-group">
+                <label class="form-label">Soil pH</label>
+                <input type="number" step="0.1" id="p-ph" class="form-control" value="6.5" data-testid="input-soil-ph">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Moisture (%)</label>
+                <input type="number" id="p-moisture" class="form-control" value="45" data-testid="input-moisture">
+              </div>
+            </div>
+
+            <div class="form-grid" style="margin-bottom: 14px; grid-template-columns: repeat(3, 1fr);">
+              <div class="form-group">
+                <label class="form-label">N (kg/ha)</label>
+                <input type="number" id="p-n" class="form-control" value="100" data-testid="input-nitrogen">
+              </div>
+              <div class="form-group">
+                <label class="form-label">P (kg/ha)</label>
+                <input type="number" id="p-p" class="form-control" value="60" data-testid="input-phosphorus">
+              </div>
+              <div class="form-group">
+                <label class="form-label">K (kg/ha)</label>
+                <input type="number" id="p-k" class="form-control" value="60" data-testid="input-potassium">
+              </div>
+            </div>
+
+            <div class="form-grid" style="margin-bottom: 20px;">
+              <div class="form-group">
+                <label class="form-label">Organic matter (%)</label>
+                <input type="number" step="0.1" id="p-om" class="form-control" value="2.5" data-testid="input-organic-matter">
+              </div>
+              <div class="form-group">
+                <label class="form-label">ML Algorithm</label>
+                <select id="p-algo" class="form-control" style="font-weight: 600; color: var(--primary-green);" data-testid="input-algo-select">
+                  <option value="Random Forest" selected>Random Forest (Recommended)</option>
+                  <option value="Gradient Boosting">Gradient Boosting</option>
+                  <option value="Decision Tree">Decision Tree</option>
+                  <option value="Linear Regression">Linear Regression</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" data-testid="submit-predict-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+              Predict yield
+            </button>
+          </form>
+        </div>
+
+        <div class="card" id="predict-result-card" data-testid="prediction-result-card">
+          <div class="empty-state" id="predict-empty">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <h3>Fill in the form and hit predict.</h3>
+            <p>Your yield estimate and ML model metrics will appear here.</p>
+          </div>
+
+          <div id="predict-output" style="display: none;">
+            <div class="result-header">
+              <span class="algo-badge" id="res-algo-badge">Random Forest</span>
+              <div class="yield-hero-num">
+                <span id="res-yield-ha" data-testid="predicted-tonnage-value">4.25</span>
+                <span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 500;">tonnes / ha</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">
+                Total harvest for <span id="res-area">5</span> acres: <strong id="res-total-yield" style="color: var(--text-dark);">8.60 tonnes</strong>
+              </p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <h4 style="font-size: 0.9rem; margin-bottom: 8px;">Algorithm Accuracy & Performance:</h4>
+              <div style="display: flex; gap: 12px;">
+                <div style="background: var(--bg-sage); padding: 8px 12px; border-radius: 8px; flex: 1; text-align: center;">
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Model R²</div>
+                  <strong id="res-r2">0.9011</strong>
+                </div>
+                <div style="background: var(--bg-sage); padding: 8px 12px; border-radius: 8px; flex: 1; text-align: center;">
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Accuracy</div>
+                  <strong id="res-accuracy" style="color: #16a34a;">90.1%</strong>
+                </div>
+                <div style="background: var(--bg-sage); padding: 8px 12px; border-radius: 8px; flex: 1; text-align: center;">
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">MAE</div>
+                  <strong id="res-mae">0.189</strong>
+                </div>
+              </div>
+            </div>
+
+            <h4 style="font-size: 0.9rem; margin-bottom: 8px;">Key Yield Driver Impact Factors:</h4>
+            <div class="impact-list" id="res-impact-container"></div>
+
+            <div style="background: #f0f7f3; border: 1px solid var(--mint-light); padding: 14px; border-radius: var(--radius-md); margin-top: 16px;" data-testid="ai-insights-container">
+              <h5 style="color: var(--primary-green); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                Agronomic AI Insight
+              </h5>
+              <ul id="res-insights-list" style="font-size: 0.85rem; color: #334155; padding-left: 18px; line-height: 1.5;"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEATHER & CLIMATE VIEW -->
+    <div id="view-weather" class="container view-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Weather & Climate</h1>
+          <p class="page-subtitle">Live conditions and 7-day forecast for your fields.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;" data-testid="weather-widget-card">
+        <form onsubmit="handleWeatherSearch(event)" style="display: flex; gap: 12px; max-width: 500px;">
+          <input type="text" id="weather-search-input" class="form-control" value="Punjab, India">
+          <button type="submit" class="btn-primary" style="width: auto; padding: 0 24px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+        </form>
+      </div>
+
+      <div class="split-layout">
+        <div class="card">
+          <h3 style="margin-bottom: 16px;">Current Field Weather</h3>
+          <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 20px;">
+            <div class="metric-icon icon-blue" style="width: 64px; height: 64px;">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+            </div>
+            <div>
+              <div style="font-size: 2.5rem; font-weight: 800;" id="w-temp">28.5°C</div>
+              <div style="color: var(--text-muted);" id="w-condition">Partly Cloudy · Punjab</div>
+            </div>
+          </div>
+          <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); text-align: center;">
+            <div style="background: var(--bg-sage); padding: 12px; border-radius: 8px;">
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Humidity</div>
+              <strong id="w-humidity">58%</strong>
+            </div>
+            <div style="background: var(--bg-sage); padding: 12px; border-radius: 8px;">
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Wind Speed</div>
+              <strong id="w-wind">12 km/h</strong>
+            </div>
+            <div style="background: var(--bg-sage); padding: 12px; border-radius: 8px;">
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Evapotranspiration</div>
+              <strong id="w-evap">4.2 mm/day</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 16px;">Agricultural Advisory</h3>
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: var(--radius-md); color: #1e40af; margin-bottom: 16px;">
+            <strong style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14.89 9 11l5 3.89 6-4.89"/><path d="M20 4v6h-6"/></svg>
+              Rain & Spraying Advisory:
+            </strong>
+            <span id="w-advisory">Mild humidity with moderate temperature. Rain expected in 3 days. Defer chemical spraying until after rain subsides.</span>
+          </div>
+          <h4 style="font-size: 0.9rem; margin-bottom: 10px;">7-Day Forecast:</h4>
+          <div id="w-forecast-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOIL CONDITION ANALYSIS VIEW -->
+    <div id="view-soil" class="container view-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Soil Condition Analysis</h1>
+          <p class="page-subtitle">Enter your soil test values to get a health score and improvement plan.</p>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <div class="card" data-testid="soil-analysis-card">
+          <form onsubmit="handleSoilSubmit(event)">
+            <div class="form-grid" style="margin-bottom: 14px;">
+              <div class="form-group">
+                <label class="form-label">Soil pH</label>
+                <input type="number" step="0.1" id="s-ph" class="form-control" value="6.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Moisture (%)</label>
+                <input type="number" id="s-moisture" class="form-control" value="45">
+              </div>
+            </div>
+            <div class="form-grid" style="margin-bottom: 14px; grid-template-columns: repeat(3, 1fr);">
+              <div class="form-group">
+                <label class="form-label">N (kg/ha)</label>
+                <input type="number" id="s-n" class="form-control" value="100">
+              </div>
+              <div class="form-group">
+                <label class="form-label">P (kg/ha)</label>
+                <input type="number" id="s-p" class="form-control" value="60">
+              </div>
+              <div class="form-group">
+                <label class="form-label">K (kg/ha)</label>
+                <input type="number" id="s-k" class="form-control" value="60">
+              </div>
+            </div>
+            <div class="form-grid" style="margin-bottom: 14px;">
+              <div class="form-group">
+                <label class="form-label">Organic matter (%)</label>
+                <input type="number" step="0.1" id="s-om" class="form-control" value="2.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Intended Crop</label>
+                <input type="text" id="s-crop" class="form-control" value="wheat">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/></svg>
+              Analyse soil
+            </button>
+          </form>
+        </div>
+
+        <div class="card" id="soil-result-card">
+          <div id="soil-output">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-light); padding-bottom: 16px; margin-bottom: 16px;">
+              <div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Soil Health Index</div>
+                <div style="font-size: 2.8rem; font-weight: 800; color: var(--primary-green);" id="s-score">82.5 <span style="font-size: 1rem; color: var(--text-muted);">/ 100</span></div>
+              </div>
+              <div class="user-badge" style="font-size: 1rem; padding: 8px 16px;" id="s-rating">Excellent</div>
+            </div>
+            <h4 style="margin-bottom: 10px;">Nutrient Amendment & Fertilizer Action Plan:</h4>
+            <ul id="s-plan-list" style="padding-left: 20px; font-size: 0.9rem; line-height: 1.6; color: #334155;"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORICAL YIELD TRENDS VIEW -->
+    <div id="view-history" class="container view-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Historical Yield Trends</h1>
+          <p class="page-subtitle">Compare seasons against regional benchmarks and rainfall.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <form onsubmit="handleHistorySearch(event)" style="display: flex; gap: 16px; align-items: flex-end;">
+          <div class="form-group" style="width: 200px;">
+            <label class="form-label">Crop</label>
+            <select id="h-crop" class="form-control">
+              <option value="Wheat" selected>Wheat</option>
+              <option value="Rice">Rice</option>
+              <option value="Maize">Maize</option>
+            </select>
+          </div>
+          <div class="form-group" style="width: 240px;">
+            <label class="form-label">Location</label>
+            <input type="text" id="h-location" class="form-control" value="Punjab, India">
+          </div>
+          <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">Load trends</button>
+        </form>
+      </div>
+
+      <div class="card" data-testid="historical-chart-container">
+        <h3 style="margin-bottom: 16px;">Multi-Year Harvest Analytics (2018–2025)</h3>
+        <div style="height: 320px; position: relative;">
+          <canvas id="historyChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARKET INTELLIGENCE VIEW -->
+    <div id="view-market" class="container view-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Market Intelligence & Post-Harvest</h1>
+          <p class="page-subtitle">APMC mandi prices, storage advice, and direct buyer linkages.</p>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3>Live Mandi Prices</h3>
+            <select id="m-crop-select" class="form-control" style="width: 140px;" onchange="loadMarketData()">
+              <option value="Wheat" selected>Wheat</option>
+              <option value="Rice">Rice</option>
+              <option value="Cotton">Cotton</option>
+              <option value="Sugarcane">Sugarcane</option>
+            </select>
+          </div>
+          <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-green);" id="m-price">₹2,275 / Quintal</div>
+          <div style="color: #16a34a; font-weight: 600; font-size: 0.9rem; margin-bottom: 16px;" id="m-trend">↑ +3.4% 30-day trend</div>
+          
+          <h4 style="font-size: 0.9rem; margin-bottom: 8px;">Nearby APMC Mandi Comparison:</h4>
+          <div id="m-mandi-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 16px;">Post-Harvest Guidance</h3>
+          <div id="m-tips-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOVERNMENT SCHEMES VIEW -->
+    <div id="view-schemes" class="container view-section">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Government Agriculture Schemes</h1>
+          <p class="page-subtitle">Verified info on subsidies, insurance, and soil card schemes.</p>
+        </div>
+      </div>
+
+      <div id="schemes-grid" class="split-layout" style="grid-template-columns: 1fr 1fr;"></div>
+    </div>
+  </div>
+
+  <!-- FLOATING BOT MASCOT HELPER -->
+  <div class="bot-mascot-widget">
+    <div class="bot-avatar" onclick="toggleChatDrawer()">
+      <div class="bot-screen">&gt;_</div>
+      <div style="font-size: 0.65rem; font-weight: bold; margin-top: 2px;">GUIDE</div>
+    </div>
+  </div>
+
+  <!-- CHAT DRAWER MODAL -->
+  <div id="chat-drawer" class="chat-drawer hidden">
+    <div class="chat-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <div>
+          <h4>AgriYieldAI Guide</h4>
+          <span style="font-size: 0.7rem; opacity: 0.9;">Platform Assistant</span>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChatDrawer()">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg bot">
+        Hi! I am your AgriYieldAI Platform Assistant. Ask me how to use the predictor, interpret soil health scores, or view weather and market trends!
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chat-input-field" class="chat-input" placeholder="Ask how to use AgriYieldAI..." onkeypress="handleChatKeyPress(event)">
+      <button class="chat-send" onclick="sendChatMessage()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
