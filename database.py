@@ -84,14 +84,18 @@ class ChatLogRecord(Base):
 
 def init_db():
     """Initialize database tables."""
+    global engine, db_session
     try:
+        with engine.connect() as conn:
+            pass
         Base.metadata.create_all(bind=engine)
         db_type = "PostgreSQL" if DB_URL.startswith("postgresql") else "SQLite (Fallback)"
         print(f"Database initialized successfully. Type: {db_type}")
     except Exception as e:
         print(f"PostgreSQL connection failed ({e}). Falling back to SQLite agriyield.db...")
-        fallback_engine = create_engine("sqlite:///agriyield.db", connect_args={"check_same_thread": False})
-        Base.metadata.create_all(bind=fallback_engine)
+        engine = create_engine("sqlite:///agriyield.db", connect_args={"check_same_thread": False})
+        db_session.configure(bind=engine)
+        Base.metadata.create_all(bind=engine)
 
 def save_prediction(crop, location, season, irrigation, field_area, soil_ph, moisture, n, p, k, om, algo, predicted_yield, total_harvest):
     session = db_session()

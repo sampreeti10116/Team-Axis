@@ -1,4 +1,6 @@
 import os
+import json
+import urllib.request
 import pandas as pd
 import numpy as np
 import joblib
@@ -434,7 +436,47 @@ class AgriMLEngine:
             }
         ]
 
+    def call_gemini_agent(self, user_msg):
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            return None
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+        
+        system_instruction = (
+            "You are AgriYieldAI, a friendly, intelligent, highly knowledgeable agronomic and farm intelligence AI Agent for farmers and agricultural advisors in India.\n"
+            "Provide natural, engaging, dynamic, and expert advice on farming, crop yield prediction, soil health (pH, NPK, organic matter), weather forecasts, APMC mandi market prices, and government schemes (PMFBY, PMKSY, SMAM).\n"
+            "Format your responses clearly using clean Markdown, bold headers, bullet points, and practical recommendations.\n"
+            "If asked off-topic non-agricultural questions, politely guide the user back to farming and AgriYieldAI features."
+        )
+
+        payload = json.dumps({
+            "contents": [
+                {
+                    "parts": [
+                        {"text": f"{system_instruction}\n\nUser Question: {user_msg}"}
+                    ]
+                }
+            ]
+        }).encode("utf-8")
+
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                data = json.loads(resp.read().decode())
+                text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                return text
+        except Exception as e:
+            print(f"[AgriYieldAI Agent API Error] Fallback triggered: {e}")
+            return None
+
     def answer_guide_query(self, user_msg):
+        # 1. Attempt dynamic Gemini AI agent call first
+        dynamic_reply = self.call_gemini_agent(user_msg)
+        if dynamic_reply:
+            return dynamic_reply
+
+        # 2. Fallback response engine if network is unavailable
         msg = user_msg.lower()
         off_topic_keywords = ['movie', 'sports', 'cricket', 'song', 'capital of', 'who is', 'python code', 'game', 'president']
         if any(k in msg for k in off_topic_keywords) and not any(k in msg for k in ['crop', 'yield', 'soil', 'weather', 'agri']):

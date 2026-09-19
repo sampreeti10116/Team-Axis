@@ -759,6 +759,13 @@
         Hi! I am your AgriYieldAI Platform Assistant. Ask me how to use the predictor, interpret soil health scores, or view weather and market trends!
       </div>
     </div>
+    <div class="chat-chips-area">
+      <button class="chat-chip" onclick="quickAskChat('🌾 Predict Wheat yield in Punjab')">🌾 Wheat yield</button>
+      <button class="chat-chip" onclick="quickAskChat('🧪 Soil pH 5.8 advice')">🧪 Soil pH</button>
+      <button class="chat-chip" onclick="quickAskChat('💰 Live Mandi prices')">💰 Mandi prices</button>
+      <button class="chat-chip" onclick="quickAskChat('🌦️ Weather in Punjab')">🌦️ Weather</button>
+      <button class="chat-chip" onclick="quickAskChat('🏛️ Government schemes')">🏛️ Schemes</button>
+    </div>
     <div class="chat-input-area">
       <input type="text" id="chat-input-field" class="chat-input" placeholder="Ask how to use AgriYieldAI..." onkeypress="handleChatKeyPress(event)">
       <button class="chat-send" onclick="sendChatMessage()">

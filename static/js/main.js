@@ -460,10 +460,27 @@ async function sendChatMessage() {
     
     const botDiv = document.createElement("div");
     botDiv.className = "msg bot";
-    botDiv.innerHTML = json.reply;
+    botDiv.innerHTML = formatMarkdown(json.reply);
     msgsContainer.appendChild(botDiv);
     msgsContainer.scrollTop = msgsContainer.scrollHeight;
   } catch (err) {
     console.error("Chat error:", err);
+  }
+}
+
+function formatMarkdown(text) {
+  if (!text) return "";
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function quickAskChat(text) {
+  const input = document.getElementById("chat-input-field");
+  if (input) {
+    input.value = text;
+    sendChatMessage();
   }
 }

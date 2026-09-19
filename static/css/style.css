@@ -640,3 +640,32 @@ code, .bot-screen {
 .view-section.active {
   display: block;
 }
+
+/* Chat Prompt Chips */
+.chat-chips-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-sage);
+  border-top: 1px solid var(--border-light);
+}
+
+.chat-chip {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--primary-green);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chat-chip:hover {
+  background: var(--primary-green);
+  color: #ffffff;
+  border-color: var(--primary-green);
+}
+
